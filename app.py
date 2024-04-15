@@ -50,7 +50,7 @@ def main():
         n_percent = st.sidebar.slider("n/N:", min_value=0.01, max_value=0.25, step=0.01, key="n_percent")
     sorting = st.sidebar.checkbox("Sort the Y, descending order (affects different methods, including those where clusters are used)", key='sorting_key', value=False)
     st.write("Selected sampling methods:")
-    method_names = st.multiselect("Selected sampling methods:", ["SRS", "BERN", "SIC", "TSC", "SYS", "NETWORK", "SEQUENTIAL",  "STR", "QUOTA"], key="methods", default=["SRS", "BERN", "SIC", "TSC", "SYS", "NETWORK", "SEQUENTIAL",  "STR", "QUOTA"], label_visibility="collapsed")
+    method_names = st.multiselect("Selected sampling methods:", ["SRS", "BERN", "SIC", "TSC", "SYS", "NETWORK",  "STR", "QUOTA"], key="methods", default=["SRS", "BERN", "SIC", "TSC", "SYS", "NETWORK",  "STR", "QUOTA"], label_visibility="collapsed")
 
     final_dict_list = []
     places = [i for i in range(1, len(method_names)+1)]
@@ -128,20 +128,20 @@ def main():
                         beta = random_integer(1,20) * random_float() - random_integer(1,10)
                     if genre == "Individually adjusted single experiment":
                         if variable!='X_2':
-                            conti_dummy = st.sidebar.radio('Type: ', ["Continious", "Dummy"],key=variable+"dummy")
+                            conti_dummy = st.sidebar.radio('Type: ', ["Continuous", "Dummy"],key=variable+"dummy")
                         else:
                             conti_dummy = "Dummy"
                             conti_dummys.append(conti_dummy)
                     else:
                         if n_variables>6 and variable!='X_1' and variable!='X_2':
-                            conti_dummy = random_choice(["Continious", "Dummy"])
+                            conti_dummy = random_choice(["Continuous", "Dummy"])
                             conti_dummys.append(conti_dummy)
                         if variable=='X_2':
                             conti_dummy = "Dummy"
                             conti_dummys.append(conti_dummy)
                         else:
-                            conti_dummy = "Continious"
-                    if conti_dummy == "Continious":
+                            conti_dummy = "Continuous"
+                    if conti_dummy == "Continuous":
                         if genre == "Individually adjusted single experiment":
                             beta_degree_check = st.sidebar.checkbox("Include degree", key=str(variable+"checkbox1"))
                         else:
@@ -276,11 +276,12 @@ def main():
                 fig2.add_trace(go.Box(
                     y=yd,
                     name=xd,
-                    boxpoints='suspectedoutliers',
-                    jitter=0.5,
-                    whiskerwidth=0.2,
+                    boxpoints='outliers',
+                    jitter=0,
+                    whiskerwidth=1,
                     marker_size=2,
-                    line_width=1)
+                    line_width=1
+                    )
                 )
         fig2.update_layout(
             title='%Bias of the mean Y in generated datasets for each sample method',
@@ -327,7 +328,7 @@ def main():
                 )
         result_list = list(range(0, int(max(merged_list)) + 1, 50))
         fig3.update_layout(
-            title='Variance of Y in generated datasets for each sample method',
+            title='Variance of the Y in generated datasets for each sample method',
             yaxis=dict(
                 autorange=True,
                 showgrid=True,

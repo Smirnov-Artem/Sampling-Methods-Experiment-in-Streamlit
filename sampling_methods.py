@@ -144,7 +144,6 @@ def sampling(sorting, model, simulated_data, sampling_technique, X, Y, std_err, 
         population = np.arange(0, len(simulated_data))
         # Define the sample size and sampling interval
         # We can provide sample size and sampling interval as per user
-        # Here sampling interval is 9 (99//10 = 9)
         sampling_interval = len(population) // sample_size
         # Define the starting point of the sample
         # refer to https://numpy.org/doc/stable/reference/random/generated/numpy.random.randint.html for random.randint()
@@ -158,7 +157,6 @@ def sampling(sorting, model, simulated_data, sampling_technique, X, Y, std_err, 
     elif sampling_technique == "QUOTA":
         shuffled_indices = simulated_data.index.to_list()
         np.random.shuffle(shuffled_indices)
-
         indeces_0s = []
         indeces_1s = []
         for index in shuffled_indices:
@@ -192,25 +190,10 @@ def sampling(sorting, model, simulated_data, sampling_technique, X, Y, std_err, 
         X_SAMPLING = sm.add_constant(sampled_data.iloc[:, 1:len(sampled_data.columns)-1])
         model_SAMPLING = sm.OLS(sampled_data['Y'], X_SAMPLING).fit(cov_type='HC3')
         Y_hat = sampled_data['Y']
-
-    elif sampling_technique == "SEQUENTIAL":
-        simulated_data_SEQ = simulated_data.copy(deep=False)
-        simulated_data_SEQ = simulated_data_SEQ.sample(frac=1).reset_index(drop=True)
-        mean_x1 = simulated_data_SEQ['X1'].mean()
-        std_dev_y = simulated_data_SEQ['X1'].std()
-        # Calculate the threshold for 2 sigmas
-        threshold = 2 * std_dev_y
-        # Create a new column based on the condition
-        simulated_data_SEQ['Within_3_Sigmas'] = np.where(np.abs(simulated_data_SEQ['X1'] - mean_x1) > threshold, 1, 0)
-        #test_results = list(simulated_data_SEQ['Within_3_Sigmas'])
-        #sequential_sampling_chart(p1=0.01,p2=0.10,alpha=0.05,beta=0.25,test_results=test_results)
-        X_SAMPLING = sm.add_constant(simulated_data_SEQ.iloc[:, 1:]).iloc[0:sample_size].drop("Within_3_Sigmas", axis=1)
-        model_SAMPLING = sm.OLS(simulated_data_SEQ['Y'].iloc[0:sample_size], X_SAMPLING).fit(cov_type='HC3')
-        Y_hat = (simulated_data_SEQ['Y'].iloc[0:sample_size])
     
     mu_hat = np.mean(Y_hat)
     mu = np.mean(Y)
-    bias = (mu_hat-mu)/mu_hat
+    bias = (mu_hat-mu)/mu * 100
 
     squared_diff = [(x - mu) ** 2 for x in np.array(Y_hat)]
     if type((sum(squared_diff) / len(Y_hat))) != np.float64:
